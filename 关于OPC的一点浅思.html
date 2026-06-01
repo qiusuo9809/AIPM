@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPC 的下一程</title>
+<style>
+:root {
+  /* 背景色系：有质感的深灰 */
+  --bg:    #19191e;
+  --bg2:   #1f1f26;
+  --t1:    rgba(255,255,255,0.92);
+  --t2:    rgba(255,255,255,0.52);
+  --t3:    rgba(255,255,255,0.28);
+  --t4:    rgba(255,255,255,0.10);
+  --accent:#2997ff;
+  --green: #30d158;
+  --orange:#ff9f0a;
+  --sep:   rgba(255,255,255,0.09);
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:clamp(15px,1.7vmin,21px);}
+/* ── NOISE TEXTURE ── */
+@keyframes noiseShift{0%{transform:translate(0,0);}25%{transform:translate(-1%,-1%);}50%{transform:translate(1%,0);}75%{transform:translate(0,1%);}100%{transform:translate(0,0);}}
+
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
+  background:var(--bg);
+  color:var(--t1);
+  overflow:hidden;width:100vw;height:100vh;
+  -webkit-font-smoothing:antialiased;
+  /* 颗粒纹理：SVG noise 叠加 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 90% 70% at 50% 30%, #222230 0%, #19191e 60%, #131318 100%);
+  background-size:200px 200px, 100% 100%;
+}
+
+/* ── STAGE ── */
+.stage{position:fixed;inset:0;}
+.slide{
+  position:absolute;inset:0;
+  display:none;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:5vmin 8vmin 9vmin;
+}
+.slide.active{display:flex;}
+
+/* ── ANIM ── */
+@keyframes up{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.slide.active [data-d]{animation:up 0.52s cubic-bezier(0.16,1,0.3,1) both;}
+.slide.active [data-d="0"]{animation-delay:0.00s;}
+.slide.active [data-d="1"]{animation-delay:0.07s;}
+.slide.active [data-d="2"]{animation-delay:0.14s;}
+.slide.active [data-d="3"]{animation-delay:0.21s;}
+.slide.active [data-d="4"]{animation-delay:0.28s;}
+.slide.active [data-d="5"]{animation-delay:0.35s;}
+
+/* ── TYPE ── */
+.super   {font-size:clamp(3.8rem,7.8vmin,7.2rem);font-weight:700;letter-spacing:-0.045em;line-height:1.03;color:var(--t1);}
+.title   {font-size:clamp(2.5rem,5vmin,4.8rem);font-weight:700;letter-spacing:-0.04em;line-height:1.06;color:var(--t1);}
+.headline{font-size:clamp(1.75rem,3.1vmin,2.9rem);font-weight:600;letter-spacing:-0.03em;line-height:1.12;color:var(--t1);}
+.subhead {font-size:clamp(1.05rem,1.85vmin,1.65rem);font-weight:400;letter-spacing:-0.01em;line-height:1.5;color:var(--t2);}
+.body    {font-size:clamp(0.9rem,1.45vmin,1.28rem);font-weight:400;line-height:1.7;color:var(--t2);}
+.caption {font-size:clamp(0.78rem,1.05vmin,0.94rem);color:var(--t3);line-height:1.6;}
+.label   {font-size:clamp(0.62rem,0.88vmin,0.8rem);font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--t3);}
+
+.blue  {color:var(--accent);}
+.green {color:var(--green);}
+.orange{color:var(--orange);}
+
+/* ── LAYOUT ── */
+.col{display:flex;flex-direction:column;}
+.row{display:flex;flex-direction:row;align-items:flex-start;}
+.c  {align-items:center;text-align:center;}
+.w  {width:100%;}
+.max-sm {max-width:700px;}
+.max-md {max-width:940px;}
+.max-lg {max-width:1120px;}
+.mx-auto{margin-left:auto;margin-right:auto;}
+.gap1{gap:0.6vmin;}.gap2{gap:1.3vmin;}.gap3{gap:2vmin;}
+.mt1{margin-top:1.2vmin;}.mt2{margin-top:2.4vmin;}.mt3{margin-top:3.8vmin;}
+
+.rule{width:100%;height:1px;background:var(--sep);border:none;flex-shrink:0;}
+
+/* ── CARD ── */
+.card{
+  border-radius:16px;border:1px solid var(--sep);
+  padding:2vmin 2.5vmin;
+  background:rgba(255,255,255,0.03);
+}
+.card-lit{
+  border-radius:16px;border:1px solid var(--sep);
+  border-top-color:rgba(255,255,255,0.15);
+  padding:2vmin 2.5vmin;
+  background:rgba(255,255,255,0.04);
+}
+
+/* ── LIST ITEM ── */
+.item{display:flex;gap:1.4vmin;align-items:flex-start;padding:1.6vmin 0;}
+.item+.item{border-top:1px solid var(--sep);}
+.item-icon {font-size:clamp(1.3rem,2vmin,1.85rem);flex-shrink:0;line-height:1.1;}
+.item-title{font-size:clamp(0.95rem,1.5vmin,1.28rem);font-weight:600;color:var(--t1);}
+.item-sub  {font-size:clamp(0.8rem,1.1vmin,0.98rem);color:var(--t3);margin-top:0.2em;line-height:1.55;}
+
+/* ── NUM BADGE ── */
+.num-badge{width:2rem;height:2rem;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#000;}
+
+/* ── 3-COL ── */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.6vmin;}
+.gcol{padding:2.4vmin 2.2vmin;border-radius:16px;border:1px solid var(--sep);border-top-color:rgba(255,255,255,0.14);background:rgba(255,255,255,0.03);}
+.gcol-icon {font-size:clamp(1.6rem,2.6vmin,2.4rem);margin-bottom:1vmin;}
+.gcol-title{font-size:clamp(0.95rem,1.5vmin,1.28rem);font-weight:600;color:var(--t1);}
+.gcol-sub  {font-size:clamp(0.6rem,0.82vmin,0.74rem);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--t3);margin-top:0.2em;}
+.gcol-body {font-size:clamp(0.82rem,1.15vmin,1.02rem);line-height:1.65;color:var(--t2);margin-top:0.9vmin;}
+
+/* ── CALLOUT ── */
+.callout{padding:1.8vmin 2.2vmin;border-radius:12px;border:1px solid rgba(41,151,255,0.18);background:rgba(41,151,255,0.055);}
+
+/* ── PROFILE ── */
+.profile{
+  display:flex;align-items:center;gap:2.8vmin;
+  padding:2.8vmin 3.2vmin;border-radius:20px;
+  border:1px solid var(--sep);border-top-color:rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.04);
+  max-width:680px;width:100%;margin:0 auto;
+}
+.profile-av{width:5.8rem;height:5.8rem;border-radius:50%;flex-shrink:0;border:1px solid rgba(255,255,255,0.14);overflow:hidden;background:#1e1e26;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--t2);font-weight:700;}
+.profile-av img{width:100%;height:100%;object-fit:cover;}
+.profile-name  {font-size:clamp(1.05rem,1.6vmin,1.4rem);font-weight:600;color:var(--t1);}
+.profile-handle{font-size:clamp(0.76rem,1.02vmin,0.9rem);color:var(--t3);margin-top:0.3em;font-family:"SF Mono",monospace;}
+.profile-bio   {font-size:clamp(0.82rem,1.15vmin,1.02rem);line-height:1.65;color:var(--t2);margin-top:0.8em;}
+
+/* ── PERSONA ── */
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6vmin;width:100%;}
+.pcard{display:flex;gap:2vmin;align-items:flex-start;padding:2.2vmin 2.4vmin;border-radius:18px;border:1px solid var(--sep);border-top-color:rgba(255,255,255,0.14);background:rgba(255,255,255,0.035);}
+.pcard-avatar{width:4.2rem;height:4.2rem;border-radius:50%;flex-shrink:0;overflow:hidden;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;font-size:1.85rem;line-height:1;}
+.pcard-avatar img{width:100%;height:100%;object-fit:cover;}
+.pcard-right{flex:1;min-width:0;}
+.pcard-name {font-size:clamp(0.98rem,1.45vmin,1.26rem);font-weight:700;color:var(--t1);}
+.pcard-meta {font-size:clamp(0.7rem,0.98vmin,0.86rem);color:var(--t3);margin-top:0.1em;}
+.pcard-tag  {display:inline-block;margin-top:0.5em;font-size:clamp(0.58rem,0.8vmin,0.72rem);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:0.18em 0.65em;border-radius:100px;border:1px solid currentColor;opacity:0.7;}
+.pcard-body {font-size:clamp(0.82rem,1.15vmin,1.02rem);line-height:1.65;color:var(--t2);margin-top:0.75em;}
+.pcard-q    {font-size:clamp(0.76rem,1.02vmin,0.9rem);color:var(--t3);margin-top:0.65em;padding-left:0.9em;border-left:1px solid var(--sep);font-style:italic;line-height:1.5;}
+
+/* ── ME MODE CARDS ── */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.4vmin;width:100%;}
+.mcard{
+  border-radius:16px;border:1px solid var(--sep);
+  border-top-color:rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.035);
+  padding:2vmin 2vmin;
+  display:flex;flex-direction:column;gap:0.9vmin;
+}
+.mcard-hd{display:flex;align-items:center;gap:1vmin;}
+.mcard-icon{font-size:clamp(1.3rem,1.9vmin,1.7rem);flex-shrink:0;}
+.mcard-title{font-size:clamp(0.9rem,1.35vmin,1.18rem);font-weight:700;color:var(--t1);}
+.mcard-mode {font-size:clamp(0.58rem,0.78vmin,0.7rem);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;opacity:0.55;margin-top:-0.1em;}
+.mcard-desc {font-size:clamp(0.8rem,1.1vmin,0.96rem);line-height:1.6;color:var(--t2);}
+/* 对话泡 */
+.chat{margin-top:0.5vmin;display:flex;flex-direction:column;gap:0.55vmin;}
+.bubble{
+  border-radius:10px;padding:0.7vmin 1vmin;
+  font-size:clamp(0.72rem,0.98vmin,0.86rem);line-height:1.5;
+}
+.bubble.u{background:rgba(41,151,255,0.12);border:1px solid rgba(41,151,255,0.18);color:rgba(255,255,255,0.78);align-self:flex-end;max-width:90%;}
+.bubble.a{background:rgba(255,255,255,0.06);border:1px solid var(--sep);color:rgba(255,255,255,0.65);align-self:flex-start;max-width:95%;}
+.bubble.sys{background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.15);color:rgba(255,159,10,0.75);font-size:clamp(0.65rem,0.88vmin,0.78rem);letter-spacing:0.04em;text-align:center;align-self:center;padding:0.4vmin 0.9vmin;border-radius:100px;}
+.chat-who{font-size:clamp(0.55rem,0.72vmin,0.64rem);color:var(--t3);letter-spacing:0.06em;text-transform:uppercase;padding:0 0.2em;}
+
+/* ── FLYWHEEL ── */
+.fw-wrap{width:100%;display:flex;flex-direction:column;gap:1.4vmin;}
+.fw-top{padding:1.2vmin 1.8vmin;border-radius:10px;border:1px solid rgba(41,151,255,0.16);background:rgba(41,151,255,0.04);text-align:center;font-size:clamp(0.82rem,1.15vmin,1rem);color:var(--accent);}
+.fw-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;align-items:center;gap:0.7vmin;}
+.fw-box{padding:1.6vmin 1.2vmin;border-radius:12px;border:1px solid var(--sep);border-top-color:rgba(255,255,255,0.12);background:rgba(255,255,255,0.035);text-align:center;}
+.fw-n  {font-size:clamp(0.52rem,0.72vmin,0.64rem);font-weight:700;letter-spacing:0.1em;color:var(--t3);margin-bottom:0.25em;}
+.fw-t  {font-size:clamp(0.85rem,1.25vmin,1.08rem);font-weight:600;color:var(--t1);}
+.fw-s  {font-size:clamp(0.68rem,0.92vmin,0.82rem);color:var(--t3);margin-top:0.2em;}
+.fw-arr{font-size:1rem;color:var(--accent);opacity:0.55;text-align:center;}
+.fw-loop{display:flex;align-items:center;justify-content:center;gap:1vmin;}
+.fw-loop-box{padding:1vmin 1.8vmin;border-radius:8px;border:1px solid var(--sep);background:rgba(255,255,255,0.025);font-size:clamp(0.78rem,1.1vmin,0.96rem);font-weight:500;color:var(--t2);white-space:nowrap;}
+.fw-loop-arr{font-size:0.85rem;color:var(--accent);opacity:0.45;}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2vmin 2.8vmin;background:rgba(17,17,21,0.78);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);border-top:1px solid var(--sep);}
+.nav-brand{font-size:clamp(0.6rem,0.82vmin,0.72rem);font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--t3);}
+.nav-pg   {font-size:clamp(0.6rem,0.82vmin,0.72rem);font-weight:500;color:var(--t3);font-family:"SF Mono",monospace;letter-spacing:0.06em;}
+.nav-btns {display:flex;gap:6px;}
+.nav-btn  {width:2.2rem;height:2.2rem;border-radius:50%;border:1px solid var(--sep);background:transparent;color:var(--t2);cursor:pointer;font-size:0.82rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.nav-btn:hover{background:rgba(255,255,255,0.08);color:var(--t1);}
+
+.progress{position:fixed;top:0;left:0;z-index:101;height:1px;background:rgba(255,255,255,0.20);transition:width 0.4s cubic-bezier(0.4,0,0.2,1);}
+.hint{position:fixed;bottom:7.2vmin;left:50%;transform:translateX(-50%);z-index:99;font-size:clamp(0.56rem,0.78vmin,0.7rem);color:var(--t3);letter-spacing:0.14em;text-transform:uppercase;transition:opacity 0.8s;white-space:nowrap;}
+.hint.gone{opacity:0;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="hint"    id="hint">Space · Click 翻页 ｜ F 全屏</div>
+<div class="stage"   id="stage"></div>
+
+<div class="nav">
+  <span class="nav-brand">Frontis Horizon</span>
+  <span class="nav-pg" id="pager">01 / 18</span>
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="prev()">←</button>
+    <button class="nav-btn" onclick="next()">→</button>
+  </div>
+</div>
+
+<script>
+const S = [
+
+/* ── 01 COVER ── */
+{ h:`
+<div class="col c max-sm mx-auto w">
+  <div class="label" data-d="0">FrontisAI · 2026.06.01</div>
+  <div class="super mt1" data-d="1">OPC 的<span class="blue">下一程</span></div>
+  <hr style="width:2.8rem;height:1px;border:none;background:rgba(255,255,255,0.12);margin:3vmin auto;" data-d="2">
+  <div class="subhead" data-d="3">从让人接单，到让能力生长</div>
+  <div class="caption mt2" data-d="4">Frontis 对 OPC 的理解与构想</div>
+</div>
+`},
+
+/* ── 02 章节一 ── */
+{ h:`
+<div class="col c max-sm mx-auto w">
+  <div class="label" data-d="0">话题一</div>
+  <div class="super mt1" data-d="1">自我介绍</div>
+</div>
+`},
+
+/* ── 03 自我介绍 ── */
+{ h:`
+<div class="col max-sm mx-auto w gap2">
+  <div class="profile" data-d="0">
+    <div class="profile-av">
+      <img src="avatar.jpg" onerror="this.style.display='none';this.parentElement.textContent='求'" alt="求索">
+    </div>
+    <div>
+      <div class="profile-name">求索</div>
+      <div class="profile-handle">微信 iamqiusuo</div>
+      <div class="profile-bio">三次转身：大厂 AI 1.0 产品经理 → OPC 创业 → 加入 Frontis<br>专注 Agent 平台 ME · WE · MA，让技术能力可封装、可交易、可进化</div>
+    </div>
+  </div>
+  <div class="card-lit col" data-d="1">
+    <div class="item"><div class="item-icon">🏢</div><div><div class="item-title">大厂 AI 1.0 产品经理</div><div class="item-sub">学会把技术能力封装成可交付的产品</div></div></div>
+    <div class="item"><div class="item-icon">🔬</div><div><div class="item-title">OPC 创业小团队</div><div class="item-sub">站到产业一线，理解技术供需的真实匹配</div></div></div>
+    <div class="item"><div class="item-icon">🚀</div><div><div class="item-title">加入 Frontis · AI 2.0 场景化产品</div><div class="item-sub">专注 Agent 平台 ME · WE · MA</div></div></div>
+  </div>
+  <div class="callout" data-d="2">
+    <span class="body"><span class="orange">核心判断：</span>AI 的能力不是壁垒，<span class="blue">对场景的理解才是</span></span>
+  </div>
+</div>
+`},
+
+/* ── 04 章节二 ── */
+{ h:`
+<div class="col c max-sm mx-auto w">
+  <div class="label" data-d="0">话题二</div>
+  <div class="super mt1" data-d="1">Frontis <span class="blue">Horizon</span></div>
+  <div class="subhead mt1" data-d="2">一套 Agent 平台 · 三层一体</div>
+</div>
+`},
+
+/* ── 05 ME ── */
+{ h:`
+<div class="col max-sm mx-auto w">
+  <div class="label" data-d="0">Layer 01</div>
+  <div class="title mt1" data-d="1"><span class="blue">ME</span> · 数字分身</div>
+  <div class="subhead mt1" data-d="2">你的第二个自己</div>
+  <div class="card-lit col mt2" data-d="3">
+    <div class="item"><div class="item-icon">🧠</div><div><div class="item-title">长期记忆</div><div class="item-sub">跨会话、跨时间积累工作背景与决策习惯</div></div></div>
+    <div class="item"><div class="item-icon">🎯</div><div><div class="item-title">专家调度</div><div class="item-sub">你只需说出需求，ME 自动判断该调哪个专家</div></div></div>
+    <div class="item"><div class="item-icon">🔄</div><div><div class="item-title">跨端一致</div><div class="item-sub">飞书、企微、Frontis，ME 记忆同步、人设一致</div></div></div>
+    <div class="item"><div class="item-icon">📈</div><div><div class="item-title">分身进化</div><div class="item-sub">每一次使用，ME 都在变得更聪明</div></div></div>
+  </div>
+</div>
+`},
+
+/* ── 06 WE ── */
+{ h:`
+<div class="col max-sm mx-auto w">
+  <div class="label" data-d="0">Layer 02</div>
+  <div class="title mt1" data-d="1"><span class="green">WE</span> · 专家网络</div>
+  <div class="subhead mt1" data-d="2">永不下班的 AI 专家军团</div>
+  <div class="card-lit col mt2" data-d="3">
+    <div class="item"><div class="item-icon">🎯</div><div><div class="item-title">战略管理</div><div class="item-sub">战略复盘 · 商机跟进 · 高管周报</div></div></div>
+    <div class="item"><div class="item-icon">🔧</div><div><div class="item-title">生产研发</div><div class="item-sub">产品创新 · 计划管理 · 质量管理</div></div></div>
+    <div class="item"><div class="item-icon">🔗</div><div><div class="item-title">供应履约</div><div class="item-sub">招标合规 · 采购管理 · 供应管理</div></div></div>
+    <div class="item"><div class="item-icon">📈</div><div><div class="item-title">营销增长</div><div class="item-sub">市场洞察 · 电商运营 · 内容营销</div></div></div>
+  </div>
+</div>
+`},
+
+/* ── 07 MA ── */
+{ h:`
+<div class="col max-sm mx-auto w">
+  <div class="label" data-d="0">Layer 03</div>
+  <div class="title mt1" data-d="1"><span class="orange">MA</span> · 进化引擎</div>
+  <div class="subhead mt1" data-d="2">用完就长，不是用完就停</div>
+  <div class="card-lit col mt2" data-d="3">
+    <div class="item"><div class="item-icon">💾</div><div><div class="item-title">经验沉淀</div><div class="item-sub">任务完成后，成功经验自动留下来</div></div></div>
+    <div class="item"><div class="item-icon">📊</div><div><div class="item-title">专家评估</div><div class="item-sub">系统持续给每个专家 Agent 打分</div></div></div>
+    <div class="item"><div class="item-icon">⚡</div><div><div class="item-title">自动优化</div><div class="item-sub">评估完自己调整，不需要人工介入</div></div></div>
+    <div class="item"><div class="item-icon">♾️</div><div><div class="item-title">数据飞轮</div><div class="item-sub">用的越多 → 越精准 → 越好用 → 越依赖</div></div></div>
+  </div>
+</div>
+`},
+
+/* ── 08 三层合一 ── */
+{ h:`
+<div class="col c max-md mx-auto w">
+  <div class="label" data-d="0">三层一体</div>
+  <div class="title mt1" data-d="1">ME · WE · MA</div>
+  <div class="subhead mt1" data-d="2">入口 · 能力 · 引擎</div>
+  <div class="g3 mt3 w" data-d="3">
+    <div class="gcol c">
+      <div class="gcol-icon">🧑</div>
+      <div class="gcol-title blue">ME</div>
+      <div class="gcol-sub">数字分身 · 入口</div>
+      <div class="gcol-body">把你的经验和工具封装成一个永不下线的数字分身</div>
+    </div>
+    <div class="gcol c">
+      <div class="gcol-icon">🌐</div>
+      <div class="gcol-title green">WE</div>
+      <div class="gcol-sub">专家网络 · 能力</div>
+      <div class="gcol-body">多个分身协同，覆盖从战略到执行的完整能力矩阵</div>
+    </div>
+    <div class="gcol c">
+      <div class="gcol-icon">♾️</div>
+      <div class="gcol-title orange">MA</div>
+      <div class="gcol-sub">进化引擎 · 飞轮</div>
+      <div class="gcol-body">越用越好——每次使用都在优化，能力资产持续增值</div>
+    </div>
+  </div>
+</div>
+`},
+
+/* ── 09 章节三 ── */
+{ h:`
+<div class="col c max-sm mx-auto w">
+  <div class="label" data-d="0">话题三</div>
+  <div class="super mt1" data-d="1">对 OPC<br><span class="blue">的理解</span></div>
+  <div class="subhead mt1" data-d="2">以及 Frontis 在 OPC 里做什么</div>
+</div>
+`},
+
+/* ── 10 四种典型画像（现在是话题三第一页） ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">一 · OPC 上的人</div>
+  <div class="headline mt1" data-d="1">四种典型画像</div>
+  <div class="persona-grid mt2" data-d="2">
+
+    <div class="pcard">
+      <div class="pcard-avatar">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=nana&backgroundColor=1a1a2e&radius=50" alt="nana">
+      </div>
+      <div class="pcard-right">
+        <div class="pcard-name">nana</div>
+        <div class="pcard-meta">33岁 · 测试 PM · 独立开发者</div>
+        <div class="pcard-tag blue">深夜独行侠</div>
+        <div class="pcard-body">公司砍了测试岗，手搓自动化工具。凌晨两点跑通第一个用例。有技术能力但不知道有没有人要。</div>
+        <div class="pcard-q">「技术已经不是壁垒了，我才是」</div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pcard-avatar">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=guo&backgroundColor=1a2e1a&radius=50" alt="guo">
+      </div>
+      <div class="pcard-right">
+        <div class="pcard-name">guo</div>
+        <div class="pcard-meta">前游戏策划 · 独立产品人</div>
+        <div class="pcard-tag green">产品有了，增长没了</div>
+        <div class="pcard-body">浏览器插件 90 万日活，AI 冲击后收入腰斩。用户量在涨、收入在跌，转型不知往哪转。</div>
+        <div class="pcard-q">「用户量在涨，收入在跌」</div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pcard-avatar">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=panfei&backgroundColor=2e1a1a&radius=50" alt="潘飞">
+      </div>
+      <div class="pcard-right">
+        <div class="pcard-name">潘飞</div>
+        <div class="pcard-meta">33岁 · 前大厂 PM · 独立顾问</div>
+        <div class="pcard-tag orange">有单了，人不够用</div>
+        <div class="pcard-body">跑通央国企项目模式，10–30万/单。一个人消化不了，找不到可信任的协作网络。</div>
+        <div class="pcard-q">「一个人接不过来，但不敢随便转包」</div>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <div class="pcard-avatar">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=linxiaolu&backgroundColor=1e1a2e&radius=50" alt="林小鹿">
+      </div>
+      <div class="pcard-right">
+        <div class="pcard-name">林小鹿</div>
+        <div class="pcard-meta">41岁 · 连续创业者</div>
+        <div class="pcard-tag" style="color:rgba(191,90,242,1)">孙悟空模式</div>
+        <div class="pcard-body">找专家出认知，她做实现。但筛选、确权、分成都没有基础设施，每次都从零开始。</div>
+        <div class="pcard-q">「想法多，但筛选成本太高」</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+`},
+
+/* ── 11 五个共性需求 ── */
+{ h:`
+<div class="col max-sm mx-auto w">
+  <div class="label" data-d="0">二 · 共性需求</div>
+  <div class="headline mt1" data-d="1">四个人背后，是五个共同的需求</div>
+  <div class="col mt2" data-d="2">
+    <div class="item"><div class="num-badge" style="background:var(--accent)">1</div><div class="body"><strong style="color:var(--t1)">被看见</strong> — 让别人直观知道「我能干什么」，不是靠嘴说，靠东西说话</div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="num-badge" style="background:var(--green)">2</div><div class="body"><strong style="color:var(--t1)">被找到</strong> — 不用自己吆喝，有需求信号时能自动匹配到我</div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="num-badge" style="background:var(--orange)">3</div><div class="body"><strong style="color:var(--t1)">能组队</strong> — 一个人干不来的事，能找到靠谱的人一起干</div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="num-badge" style="background:#ff453a">4</div><div class="body"><strong style="color:var(--t1)">能沉淀</strong> — 做过的项目、搓的工具，要留下复用，不要带走</div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="num-badge" style="background:#bf5af2">5</div><div class="body"><strong style="color:var(--t1)">能长大</strong> — 从单打独斗到带队伍，从卖时间到卖产品，每一步有路可走</div></div>
+  </div>
+</div>
+`},
+
+/* ── 12 OPC 本质 ── */
+{ h:`
+<div class="col max-sm mx-auto w">
+  <div class="label" data-d="0">三</div>
+  <div class="title mt1" data-d="1">OPC 的本质与<br>亦庄的定位</div>
+  <div class="card-lit mt2" data-d="2">
+    <div class="body">OPC 不是技术概念。它是一套<span class="blue"> 连接技术供需的信任基础设施</span>。让开发者和需求方在同一个平台上完成发现、匹配、协作。<br><br>核心命题：<strong style="color:rgba(255,255,255,0.88)">降低技术交易的信任成本。</strong></div>
+  </div>
+  <div class="col mt2" data-d="3">
+    <div class="item"><div class="item-icon">🏛️</div><div><div class="item-title">给标准</div><div class="item-sub">推出技能认定体系，给经过认证的能力包和开发者一个官方信用标签。这是信任的锚。</div></div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="item-icon">🏭</div><div><div class="item-title">给场景</div><div class="item-sub">把亦庄真实的产业需求注入 OPC 生态——制造业升级、国企数字化、中小企业转型。</div></div></div>
+    <div class="rule"></div>
+    <div class="item"><div class="item-icon">🌱</div><div><div class="item-title">给成长路径</div><div class="item-sub">从萌芽期的 nana，到跑通模式的潘飞，到转型期的林小鹿——每个阶段的人都能在 OPC 上找到自己长大的路。</div></div></div>
+  </div>
+</div>
+`},
+
+/* ── 13 如果 OPC 能交易能力 ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">四</div>
+  <div class="headline mt1" data-d="1">如果 OPC 能<span class="blue">交易能力</span></div>
+  <div class="g3 mt2" data-d="2">
+    <div class="gcol">
+      <div class="gcol-icon">📦</div>
+      <div class="gcol-title blue">能力包经济</div>
+      <div class="gcol-sub">可部署 · 可订阅</div>
+      <div class="gcol-body">nana 的自动化测试 workflow 不再是作品集素材，而是可部署、可订阅、有人持续付费的数字资产</div>
+    </div>
+    <div class="gcol">
+      <div class="gcol-icon">🤝</div>
+      <div class="gcol-title green">协作网络经济</div>
+      <div class="gcol-sub">可信 · 可调度</div>
+      <div class="gcol-body">潘飞找到 nana 协作，不需要合同和谈判——信用在 OPC 上，能力包一键接入</div>
+    </div>
+    <div class="gcol">
+      <div class="gcol-icon">🧬</div>
+      <div class="gcol-title orange">认知变现经济</div>
+      <div class="gcol-sub">可封装 · 可复用</div>
+      <div class="gcol-body">林小鹿的孙悟空模式有了基础设施：确权、分成、复用，靠系统保证而不是个人信任</div>
+    </div>
+  </div>
+  <div class="callout mt2" data-d="3">
+    <div class="body c">技术能力从<span class="blue"> 附着在人身上 </span>，变成<span class="orange"> 可流通的资产</span></div>
+  </div>
+</div>
+`},
+
+/* ── 14 Frontis 在 OPC ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">五</div>
+  <div class="headline mt1" data-d="1">Frontis Horizon 在 OPC 里的角色</div>
+  <div class="g3 mt2" data-d="2">
+    <div class="gcol">
+      <div class="gcol-icon">🧑</div>
+      <div class="gcol-title blue">ME · 能力封装器</div>
+      <div class="gcol-sub">数字分身</div>
+      <div class="gcol-body">把开发者的经验、工具、方法论封装成可交互、可部署、可交易的 Agent。活的、会跑的能力体。</div>
+    </div>
+    <div class="gcol">
+      <div class="gcol-icon">🌐</div>
+      <div class="gcol-title green">WE · 能力网络</div>
+      <div class="gcol-sub">专家网络</div>
+      <div class="gcol-body">能力包不是孤立的。可被发现、组合、调度，多个能力包协同解决复杂问题。</div>
+    </div>
+    <div class="gcol">
+      <div class="gcol-icon">♾️</div>
+      <div class="gcol-title orange">MA · 能力进化器</div>
+      <div class="gcol-sub">进化引擎</div>
+      <div class="gcol-body">每一次被使用都在优化。用的人越多越强。平台能力资产不是在衰减，是在增值。</div>
+    </div>
+  </div>
+  <div class="callout mt2" data-d="3">
+    <div class="body c">ME 让开发者<span class="blue"> 被看见、被找到</span> · WE 让开发者<span class="green"> 能组队</span> · MA 让经验<span class="orange"> 能沉淀、能力能长大</span></div>
+  </div>
+</div>
+`},
+
+/* ── 15 ME 三种模式·强化版（有 case 对话） ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">六 · ME 数字分身</div>
+  <div class="headline mt1" data-d="1">数字分身的<span class="blue">三种工作模式</span></div>
+  <div class="mode-grid mt2" data-d="2">
+
+    <!-- 货架模式 -->
+    <div class="mcard">
+      <div class="mcard-hd">
+        <div class="mcard-icon">🪟</div>
+        <div>
+          <div class="mcard-title">货架模式</div>
+          <div class="mcard-mode blue">能力 · 被动陈列</div>
+        </div>
+      </div>
+      <div class="mcard-desc">ME 是你 24h 不下线的数字货架。需求方搜索、浏览，直接与你的分身对话评估，不用先约人。</div>
+      <div class="chat">
+        <div class="bubble sys">↓ 真实场景</div>
+        <div class="chat-who">采购总监 刘总</div>
+        <div class="bubble u">你们做过制造业 ERP 对接的自动化测试吗？</div>
+        <div class="chat-who">nana 的 ME</div>
+        <div class="bubble a">做过，去年给某钢铁集团跑过 3 轮回归测试，用例覆盖率 97%。我可以把案例发给你，也可以直接演示一个 Demo 流程。</div>
+        <div class="bubble u">那先看看 Demo 吧</div>
+        <div class="bubble a">好，这是演示链接 🔗 · 我同时把报价方案也带上了</div>
+      </div>
+    </div>
+
+    <!-- 撮合模式 -->
+    <div class="mcard">
+      <div class="mcard-hd">
+        <div class="mcard-icon">🎯</div>
+        <div>
+          <div class="mcard-title">撮合模式</div>
+          <div class="mcard-mode green">商机 · 主动出击</div>
+        </div>
+      </div>
+      <div class="mcard-desc">ME 持续扫描平台上的需求池。匹配到你的能力标签，主动接触、初步沟通，你醒来只需决定接不接。</div>
+      <div class="chat">
+        <div class="bubble sys">↓ 真实场景</div>
+        <div class="chat-who">nana 的 ME（主动发出）</div>
+        <div class="bubble a">您好，看到您在找「Selenium 自动化测试」的技术支持，我是 nana 的数字分身，她在这方面有 4 年经验，上周刚完成类似项目。需要进一步了解吗？</div>
+        <div class="chat-who">需求方 张工</div>
+        <div class="bubble u">可以，预算大概在 3 万以内，周期两周，你们能接吗？</div>
+        <div class="chat-who">nana 的 ME</div>
+        <div class="bubble a">可以。我已将需求摘要发给 nana，她今天会和您确认细节。</div>
+        <div class="chat-who">nana（刚起床）</div>
+        <div class="bubble sys">✅ 你的 ME 帮你谈到了一个新项目</div>
+      </div>
+    </div>
+
+    <!-- 推荐模式 -->
+    <div class="mcard">
+      <div class="mcard-hd">
+        <div class="mcard-icon">📱</div>
+        <div>
+          <div class="mcard-title">推荐模式</div>
+          <div class="mcard-mode orange">产品 · 销售接待</div>
+        </div>
+      </div>
+      <div class="mcard-desc">你已有产品或工具，ME 负责展示、试用引导、问题解答。不只是卖服务，也在卖你做的东西。</div>
+      <div class="chat">
+        <div class="bubble sys">↓ 真实场景</div>
+        <div class="chat-who">访客 李老板</div>
+        <div class="bubble u">你们这个「电商选品分析工具」怎么收费的？能不能试用一下？</div>
+        <div class="chat-who">guo 的 ME</div>
+        <div class="bubble a">有 7 天免费试用，直接注册就能用。我帮你走一遍核心功能：输入你的目标品类，它会自动跑竞品价格、评价、销量趋势……</div>
+        <div class="bubble u">这个挺实用的，订阅版多少钱？</div>
+        <div class="bubble a">月付 199，年付 1499。这是订阅链接，付完我这边会自动开通权限。</div>
+        <div class="chat-who">guo</div>
+        <div class="bubble sys">💰 你的 ME 在你睡觉时完成了一笔订阅销售</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+`},
+
+/* ── 16 三方关系 ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">七</div>
+  <div class="headline mt1" data-d="1">三方角色怎么一起运转</div>
+  <div class="g3 mt2" data-d="2">
+    <div class="gcol" style="border-top-color:rgba(41,151,255,0.45)">
+      <div class="gcol-icon">🏛️</div>
+      <div class="gcol-title">政府</div>
+      <div class="gcol-sub blue">提供标准和公信力</div>
+      <div class="gcol-body">· 推动技能认定体系，官方信用标签<br>· 注入亦庄产业真实需求<br>· 对外展示——能力资产厚度 = 技术实力</div>
+    </div>
+    <div class="gcol" style="border-top-color:rgba(48,209,88,0.45)">
+      <div class="gcol-icon">👥</div>
+      <div class="gcol-title">waytoAGI</div>
+      <div class="gcol-sub green">提供运营和社区</div>
+      <div class="gcol-body">· 聚人——让更多人进入 OPC 生态<br>· 活跃——组织交流分享对接<br>· 育成——帮 nana 找方向，帮 guo 对接资源</div>
+    </div>
+    <div class="gcol" style="border-top-color:rgba(255,159,10,0.45)">
+      <div class="gcol-icon">⚙️</div>
+      <div class="gcol-title">Frontis</div>
+      <div class="gcol-sub orange">提供技术基座</div>
+      <div class="gcol-body">· ME——能力被封装和被看见<br>· WE——能力被组网和调度<br>· MA——能力越用越厚</div>
+    </div>
+  </div>
+  <div class="callout mt2" data-d="3">
+    <div class="body c">政府给<span class="blue"> 信任</span> · waytoAGI 给<span class="green"> 社区</span> · Frontis 给<span class="orange"> 工具</span></div>
+  </div>
+</div>
+`},
+
+/* ── 17 增长飞轮 ── */
+{ h:`
+<div class="col max-lg mx-auto w">
+  <div class="label" data-d="0">八</div>
+  <div class="headline mt1" data-d="1">增长飞轮</div>
+  <div class="fw-wrap mt2" data-d="2">
+    <div class="fw-top">🏛️ 政府技能认定 &nbsp;·&nbsp; 👥 waytoAGI 社区运营</div>
+    <div style="text-align:center;color:var(--accent);opacity:0.5;font-size:0.9rem;">↓</div>
+    <div class="fw-row">
+      <div class="fw-box">
+        <div class="fw-n">01</div>
+        <div class="fw-t">开发者进入</div>
+        <div class="fw-s">创建 ME 数字分身</div>
+      </div>
+      <div class="fw-arr">→</div>
+      <div class="fw-box">
+        <div class="fw-n">02</div>
+        <div class="fw-t">上架能力包</div>
+        <div class="fw-s">ME 封装器</div>
+      </div>
+      <div class="fw-arr">→</div>
+      <div class="fw-box">
+        <div class="fw-n">03</div>
+        <div class="fw-t">被发现和使用</div>
+        <div class="fw-s">WE 发现网络</div>
+      </div>
+      <div class="fw-arr">→</div>
+      <div class="fw-box">
+        <div class="fw-n">04</div>
+        <div class="fw-t">MA 优化迭代</div>
+        <div class="fw-s">越用越好用</div>
+      </div>
+    </div>
+    <div class="rule"></div>
+    <div class="fw-loop">
+      <div class="fw-loop-box" style="border-color:rgba(48,209,88,0.2);background:rgba(48,209,88,0.04)">更多人来用</div>
+      <div class="fw-loop-arr">→</div>
+      <div class="fw-loop-box" style="border-color:rgba(255,159,10,0.2);background:rgba(255,159,10,0.04)">开发者持续收入</div>
+      <div class="fw-loop-arr">→</div>
+      <div class="fw-loop-box" style="border-color:rgba(41,151,255,0.2);background:rgba(41,151,255,0.04)">更多能力包</div>
+      <div class="fw-loop-arr">→</div>
+      <div class="fw-loop-box" style="border-color:rgba(255,255,255,0.08)">吸引更多开发者</div>
+    </div>
+    <div class="callout" data-d="3">
+      <div class="body c"><strong style="color:var(--t1)">护城河：能力资产的厚度。</strong><br>开发者会流动，但能力包留下了。平台不是越用越薄，是<span class="orange"> 越用越厚</span>。</div>
+    </div>
+  </div>
+</div>
+`},
+
+/* ── 18 结语 ── */
+{ h:`
+<div class="col c max-sm mx-auto w">
+  <div class="label" data-d="0">结语</div>
+  <div class="super mt1" data-d="1">让技术<br><span class="blue">真正创造价值</span></div>
+  <div class="col c mt2" data-d="2" style="gap:0.5vmin;opacity:0.45">
+    <div class="subhead" style="font-weight:300">从一个 AI 产品经理的成长</div>
+    <div class="subhead" style="font-weight:300">到 Frontis Horizon 的 Agent 平台</div>
+    <div class="subhead" style="font-weight:300">再到对 OPC 的理解和参与</div>
+  </div>
+  <div class="card mt3 max-sm mx-auto" style="max-width:640px;width:100%;" data-d="3">
+    <div class="body c" style="line-height:1.85">
+      亦庄有产业基础，有政策资源，有 waytoAGI 这样的运营力量。<br>
+      我们 Frontis 来提供能把能力从人身上解耦出来、<br>让生态越用越厚的技术基座。
+    </div>
+  </div>
+  <div class="subhead mt3" data-d="4" style="opacity:0.35;font-weight:300">感谢聆听 · 期待与亦庄 OPC 携手同行</div>
+</div>
+`},
+
+];
+
+/* ── CONTROLLER ── */
+const stage=document.getElementById('stage');
+const pager=document.getElementById('pager');
+const progress=document.getElementById('progress');
+const hint=document.getElementById('hint');
+let idx=0;
+
+S.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='slide';
+  el.innerHTML=s.h;
+  stage.appendChild(el);
+});
+const slides=stage.querySelectorAll('.slide');
+
+function show(i){
+  if(i<0)i=0;
+  if(i>=slides.length)i=slides.length-1;
+  slides[idx].classList.remove('active');
+  idx=i;
+  slides[idx].classList.add('active');
+  pager.textContent=String(idx+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  progress.style.width=((idx+1)/slides.length*100)+'%';
+  if(idx>0)hint.classList.add('gone');
+}
+function next(){show(idx+1);}
+function prev(){show(idx-1);}
+function fs(){!document.fullscreenElement?document.documentElement.requestFullscreen?.():document.exitFullscreen?.();}
+
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','Enter','j','PageDown'].includes(e.key)){e.preventDefault();next();}
+  if(['ArrowLeft','k','PageUp'].includes(e.key)){e.preventDefault();prev();}
+  if(e.key==='f'||e.key==='F'){e.preventDefault();fs();}
+});
+let tx=null;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+document.addEventListener('touchend',e=>{if(tx==null)return;e.changedTouches[0].clientX-tx<-40?next():e.changedTouches[0].clientX-tx>40?prev():0;tx=null;});
+document.addEventListener('click',e=>{if(e.target.closest('.nav,.hint'))return;e.clientX>innerWidth/2?next():prev();});
+
+show(0);
+</script>
+</body>
+</html>
