@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontis / OPC — 战略汇报</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F7F4;
+    --surface: #FFFFFF;
+    --border: #E8E6E1;
+    --border-light: #F0EFEA;
+    --text: #1A1814;
+    --text-secondary: #6B6863;
+    --text-muted: #9C9994;
+    --accent-subtle: rgba(26,24,20,0.04);
+    --green: #2D6A4F;
+    --green-bg: rgba(45,106,79,0.06);
+    --amber: #B8860B;
+    --amber-bg: rgba(184,134,11,0.06);
+    --red: #9B2C2C;
+    --red-bg: rgba(155,44,44,0.06);
+    --blue: #1A5C8A;
+    --blue-bg: rgba(26,92,138,0.06);
+    --max-w: 1080px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(248,247,244,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  nav .logo { font-size: 13px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-secondary); }
+  nav .logo em { font-style: normal; color: var(--text); }
+  nav .toc { display: flex; gap: 2px; }
+  nav .toc a {
+    font-size: 12px; color: var(--text-muted); text-decoration: none;
+    padding: 6px 12px; border-radius: 4px; transition: all 0.15s;
+  }
+  nav .toc a:hover { color: var(--text); background: var(--accent-subtle); }
+
+  .cover {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    max-width: var(--max-w); margin: 0 auto;
+  }
+  .cover .badge {
+    font-size: 11px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 40px;
+  }
+  .cover h1 {
+    font-size: clamp(56px, 7vw, 96px); font-weight: 700;
+    letter-spacing: -3.5px; line-height: 0.95; margin-bottom: 24px; color: var(--text);
+  }
+  .cover h1 .dim { color: var(--text-muted); }
+  .cover .sub {
+    font-size: clamp(18px, 2vw, 24px); font-weight: 400;
+    color: var(--text-secondary); max-width: 560px; line-height: 1.4;
+    letter-spacing: -0.2px; margin-bottom: 48px;
+  }
+  .cover .meta {
+    display: flex; gap: 40px; font-size: 13px; color: var(--text-muted); font-weight: 500;
+  }
+
+  section {
+    max-width: var(--max-w); margin: 0 auto; padding: 100px 48px;
+  }
+  section + section { border-top: 1px solid var(--border-light); }
+
+  .section-head { margin-bottom: 56px; }
+  .section-head .num {
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
+  }
+  .section-head h2 {
+    font-size: clamp(28px, 3.2vw, 40px); font-weight: 600;
+    letter-spacing: -1.2px; line-height: 1.1; color: var(--text);
+  }
+  .section-head p {
+    font-size: 15px; color: var(--text-secondary); max-width: 600px;
+    margin-top: 12px; line-height: 1.6;
+  }
+
+  h3 { font-size: 18px; font-weight: 600; letter-spacing: -0.2px; margin: 48px 0 16px; color: var(--text); }
+  h3:first-of-type { margin-top: 0; }
+  h4 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; }
+  p, li { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+
+  blockquote {
+    border-left: 2px solid var(--text); padding: 12px 24px;
+    margin: 32px 0; font-size: 16px; font-weight: 500;
+    color: var(--text); line-height: 1.6; letter-spacing: -0.1px;
+  }
+
+  .deck {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; margin: 24px 0;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px; transition: border-color 0.15s;
+  }
+  .card:hover { border-color: var(--text-muted); }
+  .card .label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .card h4 { font-size: 16px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.1px; }
+  .card p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+  .card-num { color: var(--text-muted); }
+  .card-num .g { color: var(--green); }
+  .card-num .a { color: var(--amber); }
+  .card-num .r { color: var(--red); }
+  .card-green { border-left: 3px solid var(--green); }
+  .card-amber { border-left: 3px solid var(--amber); }
+  .card-blue { border-left: 3px solid var(--blue); }
+
+  .table-wrap {
+    overflow-x: auto; margin: 24px 0;
+    border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13.5px;
+  }
+  th, td {
+    padding: 12px 16px; text-align: left;
+    border-bottom: 1px solid var(--border-light); vertical-align: top;
+  }
+  th {
+    background: var(--accent-subtle); font-weight: 600;
+    font-size: 11px; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--text-secondary);
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: 500; color: var(--text); white-space: nowrap; }
+
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px 28px; margin: 24px 0;
+    font-family: 'DM Mono', 'SF Mono', 'Menlo', monospace;
+    font-size: 12.5px; line-height: 1.8;
+    white-space: pre; overflow-x: auto; color: var(--text-secondary);
+  }
+  .diagram .hl { color: var(--text); font-weight: 500; }
+  .diagram .dim { color: var(--text-muted); }
+
+  .highlight-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px 24px; margin: 24px 0;
+  }
+  .highlight-box p { margin: 0; font-size: 14px; line-height: 1.6; }
+  .highlight-box strong { color: var(--text); }
+
+  .layers { margin: 24px 0; }
+  .layer {
+    display: flex; align-items: stretch; gap: 0;
+    border: 1px solid var(--border); border-radius: 6px;
+    margin-bottom: 6px; overflow: hidden;
+  }
+  .layer:last-child { margin-bottom: 0; }
+  .layer .ll {
+    min-width: 80px; padding: 14px 16px;
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--border); background: var(--accent-subtle); color: var(--text-secondary);
+  }
+  .layer .lc { flex: 1; padding: 14px 18px; font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; }
+  .layer .lc strong { color: var(--text); }
+  .layer-scene { border-left: 3px solid var(--text); }
+  .layer-spoke { border-left: 3px solid var(--green); }
+  .layer-base { border-left: 3px solid var(--amber); }
+
+  .swot { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+  .swot-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+  .swot-card h4 { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .swot-card ul { list-style: none; }
+  .swot-card li { font-size: 13px; color: var(--text-secondary); padding: 3px 0; position: relative; padding-left: 14px; line-height: 1.5; }
+  .swot-card li::before { content: '\2014'; position: absolute; left: 0; color: var(--text-muted); }
+  .swot-s h4 { color: var(--green); } .swot-w h4 { color: var(--amber); } .swot-o h4 { color: var(--blue); } .swot-t h4 { color: var(--red); }
+  .swot-s { border-top: 2px solid var(--green); } .swot-w { border-top: 2px solid var(--amber); }
+  .swot-o { border-top: 2px solid var(--blue); } .swot-t { border-top: 2px solid var(--red); }
+
+  .roadmap { margin: 32px 0; }
+  .rm-item {
+    padding: 24px 0 24px 40px; position: relative;
+    border-left: 1px solid var(--border); margin-left: 8px;
+  }
+  .rm-item:first-child { padding-top: 0; }
+  .rm-item:last-child { padding-bottom: 0; }
+  .rm-item::before {
+    content: ''; position: absolute; left: -5px; top: 28px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--surface); border: 1.5px solid var(--text-muted);
+  }
+  .rm-item:first-child::before { top: 4px; }
+  .rm-item .phase {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+  }
+  .rm-item .meta-line {
+    font-size: 12px; color: var(--text-muted); margin-bottom: 4px;
+  }
+  .rm-item .level {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    padding: 2px 10px; border-radius: 3px;
+    background: var(--accent-subtle); color: var(--text); margin-bottom: 6px;
+  }
+  .rm-item h4 { font-size: 17px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.1px; }
+  .rm-item ul { list-style: none; }
+  .rm-item li { font-size: 14px; padding: 2px 0 2px 16px; position: relative; color: var(--text-secondary); line-height: 1.5; }
+  .rm-item li::before { content: '\2014'; position: absolute; left: 0; color: var(--text-muted); }
+
+  footer { text-align: center; padding: 48px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border-light); letter-spacing: 0.5px; }
+
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 3px;
+  }
+  .tag-s { background: var(--green-bg); color: var(--green); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    nav .toc { display: none; }
+    .cover { padding: 100px 24px 60px; }
+    section { padding: 60px 24px; }
+    .swot { grid-template-columns: 1fr; }
+    .deck { grid-template-columns: 1fr; }
+    .layer { flex-direction: column; }
+    .layer .ll { border-right: none; border-bottom: 1px solid var(--border); padding: 10px; }
+    .cover .meta { flex-direction: column; gap: 6px; }
+  }
+  @media print {
+    nav { display: none; }
+    .cover { min-height: auto; padding-top: 80px; }
+    section { padding: 48px 0; page-break-inside: avoid; }
+    .card:hover { border-color: var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><em>Frontis</em> / OPC</div>
+  <div class="toc">
+    <a href="#who">Intro</a>
+    <a href="#why">Context</a>
+    <a href="#vision">Vision</a>
+    <a href="#yizhuang">Yizhuang</a>
+    <a href="#swot">SWOT</a>
+    <a href="#business">Model</a>
+    <a href="#roadmap">Roadmap</a>
+  </div>
+</nav>
+
+<section class="cover">
+  <div class="badge">Strategy Report / 2026.06</div>
+  <h1>Frontis <span class="dim">/</span> OPC</h1>
+  <p class="sub">让技术供给者从被看见到能长大</p>
+  <div class="meta">
+    <span>产品与战略团队</span>
+    <span>v3.0</span>
+  </div>
+</section>
+
+<!-- 1 -->
+<section id="who">
+  <div class="section-head">
+    <div class="num">01</div>
+    <h2>我们是谁</h2>
+    <p>Frontis 是一套三层一体的 AI Agent 平台，定位为能力资产化的技术基座。</p>
+  </div>
+  <div class="layers">
+    <div class="layer layer-scene">
+      <div class="ll">ME</div>
+      <div class="lc"><strong>数字分身</strong> — 能力的封装与展示。把开发者的经验、工具、方法论封装成交互式 Agent。不是聊天机器人，是第二个自己。</div>
+    </div>
+    <div class="layer layer-spoke">
+      <div class="ll">WE</div>
+      <div class="lc"><strong>专家网络</strong> — 能力的发现、组网与调度。覆盖战略管理、生产研发、供应履约、营销增长等核心领域。</div>
+    </div>
+    <div class="layer layer-base">
+      <div class="ll">MA</div>
+      <div class="lc"><strong>进化引擎</strong> — 能力的使用、评估与自动优化。任务完成 → 经验沉淀 → 表现评估 → 自动优化，飞轮越转越快。</div>
+    </div>
+  </div>
+  <p style="margin-top: 20px; font-size: 14px; font-weight: 500; color: var(--text);">ME 是入口，WE 是能力，MA 是引擎。技术平台需要场景来验证和落地。我们判断 OPC 是 AI 时代最大且最急迫的场景。</p>
+</section>
+
+<!-- 2 -->
+<section id="why">
+  <div class="section-head">
+    <div class="num">02</div>
+    <h2>为何是 OPC</h2>
+    <p>AI 大幅提升了个人的生产能力，但没有降低一人公司参与商业交易的信任成本。</p>
+  </div>
+
+  <div class="deck">
+    <div class="card">
+      <p class="label card-num">核心层 <span class="g">500–800万</span></p>
+      <p>独立开发者、自由职业技术者、独立产品人</p>
+    </div>
+    <div class="card">
+      <p class="label card-num">扩展层 <span class="a">2000–3000万</span></p>
+      <p>在职但业余接单或做产品的技术人员</p>
+    </div>
+    <div class="card">
+      <p class="label card-num">潜力层 <span class="r">5000万+</span></p>
+      <p>AI 赋能后具备技术供给能力的非技术人员</p>
+    </div>
+  </div>
+
+  <h3>玻璃天花板</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>维度</th><th>大公司</th><th>一人公司</th></tr>
+      <tr><td>品牌信任</td><td>品牌自带信任</td><td>没人知道你是谁</td></tr>
+      <tr><td>获客渠道</td><td>销售团队 + 市场预算</td><td>靠口碑和运气</td></tr>
+      <tr><td>协作网络</td><td>内部组织</td><td>找不到靠谱的人</td></tr>
+      <tr><td>交易基础设施</td><td>法务、财务、合同</td><td>每次从零开始</td></tr>
+      <tr><td>能力传承</td><td>组织知识库</td><td>干完就忘</td></tr>
+    </table>
+  </div>
+
+  <div class="deck">
+    <div class="card card-green">
+      <p class="label">T1 萌芽期</p>
+      <h4>nana · 33 岁</h4>
+      <p>"公司砍了测试岗，手搓自动化工具。有技术能力但不知道有没有人要。"<br><br><strong>痛点</strong>：被看见 > 学习成长 > 能交易</p>
+    </div>
+    <div class="card card-amber">
+      <p class="label">T2 生存期</p>
+      <h4>guo · 前游戏策划</h4>
+      <p>"浏览器插件 90 万日活，AI 冲击后收入腰斩。用户量在涨、收入在跌。"<br><br><strong>痛点</strong>：变现转型 > 产品推广 > 收入多元化</p>
+    </div>
+    <div class="card card-amber">
+      <p class="label">T3 扩张期</p>
+      <h4>潘飞 · 33 岁</h4>
+      <p>"跑通央国企项目模式，10–30 万/单。一个人消化不了，找不到可信任的协作网络。"<br><br><strong>痛点</strong>：分包协作 > 获客效率 > 团队化</p>
+    </div>
+    <div class="card card-blue">
+      <p class="label">T4 平台期</p>
+      <h4>林小鹿 · 41 岁</h4>
+      <p>"找专家出认知，她做实现。筛选、确权、分成都没有基础设施，每次都从零开始。"<br><br><strong>痛点</strong>：确权分账 > 信任传递 > 模式复制</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+Level 5  能长大 —— 从卖时间到卖产品
+Level 4  能沉淀 —— 做过的项目、工具能留下复用
+Level 3  能组队 —— 一个人干不来的事能找到靠谱的人<span class="dim">      ← 今天没有平台能满足全部五个</span>
+Level 2  被找到 —— 有需求信号时能自动匹配到我
+Level 1  被看见 —— 让别人知道「我能干什么」</div>
+</section>
+
+<!-- 3 (merged) -->
+<section id="vision">
+  <div class="section-head">
+    <div class="num">03</div>
+    <h2>OPC 全景图与 MVP</h2>
+    <p>OPC 不是单一产品，而是一套让技术供给者从被看见到能长大的生态基础设施。MVP 是进入这个生态的入场券。</p>
+  </div>
+
+  <div class="diagram">
+<span class="hl">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="hl">│                      OPC 全景图                                 │</span>
+<span class="hl">│                                                                  │</span>
+<span class="hl">│   Level 1    →    Level 2    →    Level 3    →   Level 4 → 5   │</span>
+<span class="hl">│    被看见          被找到          能组队        沉淀 + 长大      │</span>
+<span class="hl">│                                                                  │</span>
+<span class="hl">│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐   │</span>
+<span class="hl">│  │onepc.me  │  │ ME 主动  │  │ WE 协作  │  │  MA 能力     │   │</span>
+<span class="hl">│  │故事名片   │  │ 撮合系统  │  │ 子网     │  │  产品化引擎   │   │</span>
+<span class="hl">│  │+ 卡片分发 │  │ + 需求池  │  │+ 技能认证 │  │  + 能力包    │   │</span>
+<span class="hl">│  └──────────┘  └──────────┘  └──────────┘  └──────────────┘   │</span>
+<span class="hl">│                                                                  │</span>
+<span class="hl">│  ═════════ MVP 范围 ════════                                     │</span>
+<span class="hl">│               ════ Phase 2 ════                                 │</span>
+<span class="hl">│                         ════════ Phase 3 ════════               │</span>
+<span class="hl">│                                   ════════════ Phase 4 ════════ │</span>
+<span class="hl">└─────────────────────────────────────────────────────────────────┘</span></div>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>需求层级</th><th>产品能力</th><th>技术基座</th><th>阶段</th></tr>
+      <tr><td>Level 1 被看见</td><td>onepc.me 故事名片 + 嵌入式卡片</td><td>ME 数字分身</td><td><span class="tag tag-s">Phase 1</span></td></tr>
+      <tr><td>Level 2 被找到</td><td>主动撮合 + 需求池匹配</td><td>ME 撮合引擎</td><td>Phase 2</td></tr>
+      <tr><td>Level 3 能组队</td><td>WE 协作子网 + 技能认定</td><td>WE 专家网络</td><td>Phase 3</td></tr>
+      <tr><td>Level 4 能沉淀</td><td>能力包封装 + 版本管理</td><td>MA 进化引擎</td><td>Phase 4</td></tr>
+      <tr><td>Level 5 能长大</td><td>成长路径 + 被动收入</td><td>MA 全链路</td><td>Phase 4+</td></tr>
+    </table>
+  </div>
+
+  <h3>能力资产化</h3>
+  <div class="diagram">
+<span class="hl">nana 的自动化测试 workflow</span>
+  →  封装成能力包上架 OPC
+  →  需求方购买 → 直接部署运行 → nana 收钱 → 继续迭代
+  →  <span class="hl">两条收入线：接项目（服务费）+ 能力包（被动收入）</span></div>
+
+  <h3>第一阶段：MVP</h3>
+  <p>全景图的 Level 1 是最优先突破的环节。这不是产品终点，而是进入生态的入场券。</p>
+
+  <div class="layers">
+    <div class="layer layer-scene">
+      <div class="ll">Hub</div>
+      <div class="lc"><strong>onepc.me</strong> — 场景层。完整故事页、发现页、撮合交易。核心功能都在这里。</div>
+    </div>
+    <div class="layer layer-spoke">
+      <div class="ll">Spoke</div>
+      <div class="lc"><strong>嵌入式能力卡片</strong> — 分发层。GitHub README / 博客 / 公众号 / 小红书 / 邮件签名。一行代码嵌入，无处不在。</div>
+    </div>
+    <div class="layer layer-base">
+      <div class="ll">Base</div>
+      <div class="lc"><strong>Frontis</strong> — 基座层。Agent 引擎、账户、积分、能力包。</div>
+    </div>
+  </div>
+
+  <h4>双轨入驻</h4>
+  <div class="deck">
+    <div class="card card-green">
+      <p class="label" style="color: var(--green);">轻量轨 · MVP 首发</p>
+      <h4>5 个字段，2 分钟建档</h4>
+      <p>身份 / 技能标签 / 合作状态 / 项目链接 / 社交链接。填写完成即生成可嵌入的能力卡片。</p>
+    </div>
+    <div class="card card-blue">
+      <p class="label" style="color: var(--blue);">深度轨 · 可选增值</p>
+      <h4>Agent 访谈生成完整故事页</h4>
+      <p>需要完整故事表达的开发者，后续通过 Agent 访谈生成完整故事页。付费增值服务。</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+开发者极简建档
+    ↓
+生成能力卡片
+    ↓
+嵌入 GitHub README / 博客 / 公众号 / 小红书 / 邮件签名
+    ↓
+访客在上下文中看到卡片 → 点击 → onepc.me 完整页
+    ↓
+查看完整故事 + 技能标签 + 合作状态 → 发起联系</div>
+</section>
+
+<!-- 4 Yizhuang (moved up) -->
+<section id="yizhuang">
+  <div class="section-head">
+    <div class="num">04</div>
+    <h2>亦庄角色</h2>
+    <p>OPC 是一套连接技术供需的信任基础设施。核心命题是降低技术交易的信任成本。</p>
+  </div>
+
+  <div class="deck">
+    <div class="card card-blue">
+      <h4>第一，给标准</h4>
+      <p>推出技能认定体系，给经过认证的能力包和开发者官方信用标签。这是信任的锚。</p>
+    </div>
+    <div class="card card-green">
+      <h4>第二，给场景</h4>
+      <p>把亦庄真实的产业需求注入 OPC 生态——制造业升级、国企数字化、中小企业转型。</p>
+    </div>
+    <div class="card card-amber">
+      <h4>第三，给成长路径</h4>
+      <p>从萌芽期的 nana 到平台期的林小鹿——每一个阶段的人都应该在 OPC 上找到自己长大的路。</p>
+    </div>
+  </div>
+
+  <h3>三方协作</h3>
+  <div class="diagram">
+<span class="hl">亦庄政府</span> —— 给标准 + 给场景 + 政策背书
+    │
+    ├── <span class="hl">Frontis</span>（技术基座）
+    │     ME → 能力封装器  /  WE → 能力网络  /  MA → 能力进化器
+    │
+    └── <span class="hl">waytoAGI</span>（社区运营）
+          聚人 + 活跃 + 内容供给
+
+标准是政府的事 · 场景是政府天然有的
+成长路径是政府和 Frontis 一起建起来的
+技术基座是 Frontis 负责 · 社区聚人是 waytoAGI 负责</div>
+
+  <div class="diagram">
+政府技能认定 → 官方信用标签 → 降低筛选成本
+    ↓
+更多开发者入驻 → 更多能力包上架
+    ↓
+更多需求方使用 → 更多交易发生
+    ↓
+交易数据反哺技能认定标准 → 标准更精准
+    ↓
+飞轮持续加速</div>
+</section>
+
+<!-- 5 SWOT -->
+<section id="swot">
+  <div class="section-head">
+    <div class="num">05</div>
+    <h2>竞品与 SWOT</h2>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>类型</th><th>代表</th><th>与我们的差异</th></tr>
+      <tr><td>自由职业平台</td><td>猪八戒、Upwork、Fiverr</td><td>标准化任务竞标，不解决能力资产沉淀</td></tr>
+      <tr><td>开发者社区</td><td>GitHub、掘金、V2EX</td><td>技术圈子，不是商业场景</td></tr>
+      <tr><td>个人主页工具</td><td>Fueler、Read.cv、Squarespace</td><td>浅层链接页，不解决供需撮合</td></tr>
+      <tr><td>招聘平台</td><td>BOSS直聘、拉勾</td><td>全职雇佣逻辑，不适合项目制合作</td></tr>
+      <tr><td>AI Agent 平台</td><td>—</td><td>暂无直接竞品以"能力资产化"为定位</td></tr>
+    </table>
+  </div>
+
+  <div class="swot">
+    <div class="swot-card swot-s">
+      <h4>优势</h4>
+      <ul>
+        <li>ME·WE·MA 三层架构，全链路技术壁垒</li>
+        <li>亦庄政府背书，技能认定体系</li>
+        <li>waytoAGI 社区供给侧运营基础</li>
+        <li>国内第一个能力资产化定位</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-w">
+      <h4>劣势</h4>
+      <ul>
+        <li>新品牌市场教育成本高</li>
+        <li>双侧市场同时启动冷启动风险</li>
+        <li>团队资源有限，无法覆盖全部层级</li>
+        <li>Agent 访谈质量波动</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-o">
+      <h4>机会</h4>
+      <ul>
+        <li>AI Agent 爆发快速扩大 OPC 人群</li>
+        <li>政府数字化采购需求池</li>
+        <li>能力包经济新兴市场，无主导者</li>
+        <li>渠道碎片化→统一表达需求增强</li>
+      </ul>
+    </div>
+    <div class="swot-card swot-t">
+      <h4>威胁</h4>
+      <ul>
+        <li>巨头可能快速跟进</li>
+        <li>GitHub 强化商业档案功能</li>
+        <li>AI Agent 平台趋同，窗口期有限</li>
+        <li>经济下行缩减技术采购预算</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <p><strong>差异化。</strong>竞争壁垒不在功能数量，而在<strong>能力资产的厚度</strong>——开发者会流动，但能力包留下了。</p>
+  </div>
+</section>
+
+<!-- 6 Business -->
+<section id="business">
+  <div class="section-head">
+    <div class="num">06</div>
+    <h2>商业模式</h2>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>模块</th><th>内容</th></tr>
+      <tr><td>客户细分</td><td>双侧市场。供给侧：一人公司。需求侧：有技术需求的企业/项目方。</td></tr>
+      <tr><td>价值主张</td><td>供给侧：一次建档，生成可嵌入能力卡片，放到所有渠道。需求侧：找到可信赖的技术能力 + 可直接部署的能力包。</td></tr>
+      <tr><td>渠道</td><td>供给侧：嵌入式卡片反向引流 + onepc.me + waytoAGI。需求侧：政府合作 + 企业采购 + 卡片曝光自然需求。</td></tr>
+      <tr><td>收入来源</td><td>撮合服务费 + 能力包分成 + 增值服务 + 企业采购。</td></tr>
+    </table>
+  </div>
+
+  <div class="diagram">
+政府技能认定 + 社区运营 + 开发者自传播
+      ↓
+<span class="hl">开发者极简建档 → 生成嵌入式能力卡片</span>
+      ↓
+卡片嵌入 GitHub / 博客 / 公众号 / 小红书
+      ↓
+访客在上下文中看到卡片 → 点击回 onepc.me
+      ↓
+需求方发起联系 → 产生合作
+      ↓
+开发者看到效果 → 更有动力更新状态
+      ↓
+<span class="hl">平台上的能力资产越来越厚 → 真正的护城河</span></div>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>年度</th><th>收入来源</th><th>关键指标</th><th>说明</th></tr>
+      <tr><td>Year 1 (Q2 26–Q1 27)</td><td>onepc 增值 + 撮合尝试</td><td>入驻 500+</td><td>MVP 验证期，优先跑通分发</td></tr>
+      <tr><td>Year 2 (Q2 27–Q1 28)</td><td>能力包分成 + 撮合费</td><td>入驻 5000+，撮合 200+</td><td>规模期</td></tr>
+      <tr><td>Year 3 (Q2 28–Q1 29)</td><td>能力包 + 企业采购</td><td>能力包交易占收入 50%+</td><td>能力资产化变现</td></tr>
+    </table>
+  </div>
+
+  <h3>关键风险</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>风险</th><th>概率</th><th>对冲策略</th></tr>
+      <tr><td>开发者入驻不及预期</td><td>中</td><td>嵌入式卡片低门槛替代长访谈</td></tr>
+      <tr><td>政府合作推进缓慢</td><td><strong>中高</strong></td><td>独立跑通非政府撮合闭环</td></tr>
+      <tr><td>交易信任建立困难</td><td>高</td><td>先做展示+匹配轻模式</td></tr>
+      <tr><td>竞品快速跟进</td><td>中</td><td>MA 进化引擎 + 技能认定体系时间壁垒</td></tr>
+      <tr><td>需求侧活跃度不足</td><td>中</td><td>政府需求池保底 + 卡片曝光反向吸引</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 7 Roadmap (quarters) -->
+<section id="roadmap">
+  <div class="section-head">
+    <div class="num">07</div>
+    <h2>路线图</h2>
+    <p>AI 时代节奏：双周迭代 × 季度验证</p>
+  </div>
+
+  <div class="roadmap">
+    <div class="rm-item">
+      <div class="phase">Phase 1 · 2026 Q2–Q3</div>
+      <span class="level">Level 1 被看见</span>
+      <h4>嵌入式能力卡片 + 产品故事名片</h4>
+      <ul>
+        <li>双轨入驻：5 字段轻量轨 + Agent 深度轨</li>
+        <li>分发机制：GitHub README badge + HTML Widget</li>
+        <li>验证：卡片嵌入率 > 60%，入驻开发者 500+</li>
+      </ul>
+    </div>
+    <div class="rm-item">
+      <div class="phase">Phase 2 · 2026 Q4–2027 Q1</div>
+      <span class="level">Level 1 → Level 2</span>
+      <h4>能力展示与撮合</h4>
+      <ul>
+        <li>ME 主动撮合 + 政府需求池</li>
+        <li>onepc.me 三合一（名片 + 窗口 + 卡片管理）</li>
+        <li>指标：撮合 50+ 笔，需求方注册 200+</li>
+      </ul>
+    </div>
+    <div class="rm-item">
+      <div class="phase">Phase 3 · 2027 Q2–Q3</div>
+      <span class="level">Level 3 能组队</span>
+      <h4>协作网络</h4>
+      <ul>
+        <li>WE 协作子网上线</li>
+        <li>技能认定体系建立</li>
+        <li>指标：协作组队 100+，二次合作率 > 40%</li>
+      </ul>
+    </div>
+    <div class="rm-item">
+      <div class="phase">Phase 4 · 2027 Q4+</div>
+      <span class="level">Level 4 → Level 5</span>
+      <h4>能力产品化引擎</h4>
+      <ul>
+        <li>MA 能力产品化引擎上线</li>
+        <li>Workflow / 能力包自动优化和独立交易</li>
+        <li>指标：能力包交易占平台收入 50%</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>Frontis / OPC · 产品与战略团队 · 2026.06</footer>
+
+</body>
+</html>
