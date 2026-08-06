@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontis AI · Agent 生命周期与企业治理改版 · 内部评审</title>
+  <style>
+    :root{--ink:#142333;--muted:#617482;--line:#dce7e9;--bg:#f5f8f8;--brand:#08b8c7;--deep:#102734;--card:#fff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}.layout{display:grid;grid-template-columns:228px minmax(0,1fr);min-height:100vh}.side{position:sticky;top:0;height:100vh;padding:34px 24px;border-right:1px solid var(--line);background:#fbfdfd}.logo{font-size:20px;font-weight:800}.logo:before{content:"◇";margin-right:12px;font-size:24px}.side small{display:block;margin:16px 0 42px;color:var(--muted);line-height:1.7}.nav a{display:block;padding:10px 12px;margin:3px 0;border-radius:8px;color:#5d707c;text-decoration:none;font-size:14px;font-weight:700}.nav a:hover{background:#e9fafa;color:#087e8c}.content{max-width:1120px;margin:0 auto;padding:50px 54px 84px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;color:#078591}.hero{padding:20px 0 56px;border-bottom:1px solid var(--line)}h1{margin:12px 0 18px;font-size:46px;letter-spacing:-2px;line-height:1.1}.lead{max-width:760px;font-size:18px;line-height:1.8;color:var(--muted)}.chips{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}.chip{padding:7px 11px;border-radius:99px;border:1px solid #bfe8eb;background:#edfbfc;color:#07808c;font-size:13px;font-weight:750}section{padding-top:56px}h2{margin:0 0 12px;font-size:28px;letter-spacing:-.8px}.intro{margin:0 0 25px;color:var(--muted);line-height:1.8}.belief{max-width:900px;padding:28px 32px;border-radius:16px;background:var(--deep);color:#fff;font-size:23px;font-weight:750;letter-spacing:-.5px;line-height:1.6}.belief em{font-style:normal;color:#85e1e7}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:23px;border:1px solid var(--line);border-radius:14px;background:var(--card)}.card .no{display:grid;place-items:center;width:29px;height:29px;border-radius:50%;background:#e7fafb;color:#078894;font-weight:800;font-size:13px}.card h3{margin:15px 0 8px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}.insight{margin-top:18px;padding:16px 18px;border-radius:11px;background:#f0fafb;color:#4f6670;line-height:1.7}.insight b{color:#16313d}.route{display:grid;grid-template-columns:70px 1fr;gap:22px;padding:22px 0;border-bottom:1px solid var(--line)}.route:last-child{border:0}.route .index{font-size:39px;font-weight:850;color:#aee5e8}.route h3{margin:0 0 6px;font-size:20px}.route p{margin:0;color:var(--muted);line-height:1.8}.principles{display:grid;grid-template-columns:1fr 1fr;gap:14px}.principle{padding:19px 21px;border-left:4px solid var(--brand);border-radius:0 11px 11px 0;background:#fff}.principle h3{margin:0;font-size:17px}.principle p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.7}.decision{display:grid;grid-template-columns:36px 1fr;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}.decision:last-child{border-bottom:0}.decision i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#e7fafb;color:#087f8c;font-style:normal;font-weight:800}.decision h3{margin:0;font-size:18px}.decision p{margin:5px 0 0;color:var(--muted);line-height:1.7}.two{display:grid;grid-template-columns:1.15fr 1fr;gap:18px}.two .card ul{padding-left:19px;margin:11px 0 0;color:var(--muted);font-size:14px;line-height:1.9}.shot-wall{display:grid;grid-template-columns:1fr 1fr;gap:16px}.shot{overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#fff}.shot.wide{grid-column:1/-1}.shot img{display:block;width:100%;height:auto;background:#eef5f5}.story-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:14px;background:#f7fbfb}.story-strip figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}.story-strip img{width:100%;height:auto}.story-strip figcaption{padding:10px 11px;color:var(--muted);font-size:13px;line-height:1.5}.shot .caption{padding:15px 17px}.shot .caption b{display:block;margin-bottom:5px}.shot .caption span{font-size:14px;color:var(--muted);line-height:1.6}.demo{margin-top:54px;padding:30px;border-radius:16px;background:var(--deep);color:#fff}.demo h2{color:#fff}.demo p{max-width:750px;color:#b9d3d7;line-height:1.8}.demo a{display:inline-block;margin:5px 8px 0 0;padding:11px 15px;border-radius:9px;background:#0bc1ce;color:#073038;text-decoration:none;font-weight:800;font-size:14px}.demo a.secondary{border:1px solid #4b7279;background:transparent;color:#e3f7f8}.note{margin-top:18px;padding:14px 17px;border-radius:10px;background:#fff8e7;color:#765e20;font-size:14px;line-height:1.7}.footer{margin-top:60px;color:#7c8c94;font-size:13px}@media(max-width:820px){.layout{display:block}.side{position:static;height:auto}.nav{display:flex;overflow:auto}.nav a{white-space:nowrap}.content{padding:34px 22px}.grid3,.principles,.two,.shot-wall,.story-strip{grid-template-columns:1fr}h1{font-size:35px}}
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="side">
+      <div class="logo">Leadeep AI</div>
+      <small>Agent 生命周期与企业治理改版<br>产品内部评审</small>
+      <nav class="nav">
+        <a href="#belief">我们相信什么</a>
+        <a href="#problem">问题的根源</a>
+        <a href="#solution">这次怎么改</a>
+        <a href="#review">评审什么</a>
+        <a href="#screens">关键画面</a>
+      </nav>
+    </aside>
+    <main class="content">
+      <header class="hero">
+        <div class="eyebrow">INTERNAL PRODUCT REVIEW</div>
+        <h1>让一个人的工作方法，<br>成为组织的共同能力</h1>
+        <p class="lead">这次不从“怎么上架一个 Agent”开始，而是回答一个更简单的问题：一个人已经验证有效的工作方法，怎样才能被更多人方便地用起来，并让企业愿意持续接管？</p>
+        <div class="chips"><span class="chip">创造</span><span class="chip">分享与发现</span><span class="chip">企业治理</span></div>
+      </header>
+
+      <section id="belief">
+        <h2>产品理念：先让一个人做成，再让更多人复用</h2>
+        <div class="belief">Agent 不该一做出来就被当成“待上架商品”。<br><em>它首先是一份可反复调用的工作方法：</em>先帮创造者完成工作，再被同事分享和使用，最后在组织里被持续维护。</div>
+        <p class="intro" style="margin-top:20px">例如，财务同学把报销规范做成 Agent：先自己用顺；再发给几个同事；同事觉得有用，可以继续推荐；当它需要服务一个部门或子公司时，企业再决定在哪里展示、谁来负责、出了问题如何停用。</p>
+      </section>
+
+      <section id="problem">
+        <h2>问题不在“没有 Agent”，而在“一个发布动作承担了太多事”</h2>
+        <p class="intro">原有发布页既要判断版本是否可用，又要决定给谁用、在哪里展示、企业如何接管。它把四种不同性质的事情压成一步，导致创建者不愿分享，企业也难以治理。</p>
+        <div class="grid3">
+          <article class="card"><div class="no">1</div><h3>这个版本能不能用？</h3><p>创造阶段的问题：是否经过调试和评测，能够稳定运行。</p></article>
+          <article class="card"><div class="no">2</div><h3>我想让谁用？</h3><p>分享阶段的问题：发给同事、协作群，或给出一个链接。</p></article>
+          <article class="card"><div class="no">3</div><h3>大家去哪里找它？</h3><p>组织阶段的问题：让一个部门、子公司或全企业能主动发现它。</p></article>
+        </div>
+        <div class="insight"><b>这次的关键：</b>不再让“发布”替所有事情做决定。发布只证明版本可用；分享、企业专区展示和企业治理，各自回到更合适的场景。</div>
+      </section>
+
+      <section id="solution">
+        <h2>方案：一条由近到远的自然路径</h2>
+        <div class="route"><div class="index">01</div><div><h3>创造：把工作方法做出来</h3><p>进化实验室只负责创建、调试、评测和发布稳定版本。发布后，创造者自己立即能用；不再要求在这里选“仅自己、团队或企业可见”。</p></div></div>
+        <div class="route"><div class="index">02</div><div><h3>分发：让需要的人得到它</h3><p>在 WE 专家中，创造者可把 Agent 发给同事、协作群或企业内链接；也可申请在部门、子公司或集团的企业专区展示。前者解决“我知道该给谁”，后者解决“我不知道该找谁”。</p></div></div>
+        <div class="route"><div class="index">03</div><div><h3>使用与治理：让个人体验和企业管理同时成立</h3><p>成员把 Agent 加到自己的专家团，在 ME 中使用。企业只处理会影响组织的关键动作：组织范围上架审批、负责人交接、停止服务和管理日志；不干预每一次普通分享。</p></div></div>
+      </section>
+
+      <section id="principles">
+        <h2>四条设计原则</h2>
+        <div class="principles">
+          <div class="principle"><h3>发布只代表“现在可用”</h3><p>稳定版本发布后，创建者先用起来。分享和企业专区展示都是后续动作，不再阻塞发布。</p></div>
+          <div class="principle"><h3>让推荐成为增长，而不是审批</h3><p>创造者和已使用过的人都能分享或推荐。接收方点击使用时再校验资格；不符合时发起申请。</p></div>
+          <div class="principle"><h3>企业专区只负责“找得到”</h3><p>上架或下架决定一个组织能否在专区找到 Agent，不会中断已在使用的人；停止服务才会真正停止使用。</p></div>
+          <div class="principle"><h3>企业只接管关键责任</h3><p>组织结构沿用客户原有部门树。部门负责人默认处理平台事项，也可指定一位 AI 负责人专门推进使用和审批。</p></div>
+        </div>
+      </section>
+
+      <section id="review">
+        <h2>本次评审，请确认四个判断</h2>
+        <article class="card">
+          <div class="decision"><i>1</i><div><h3>Agent 的第一身份是“可复用的工作能力”</h3><p>它不必一开始就成为企业商品。先有真实使用，再决定分享和组织展示的范围。</p></div></div>
+          <div class="decision"><i>2</i><div><h3>分享与企业专区是两条互补路径</h3><p>分享解决“我知道该给谁用”；企业专区解决“我不知道该找哪个 Agent”。两条路径共同带来复用和增长。</p></div></div>
+          <div class="decision"><i>3</i><div><h3>企业管理只接管关键风险和责任</h3><p>企业不替创建者做日常分享；只在扩大组织范围、交接责任、停止服务时介入，并留下可追溯的记录。</p></div></div>
+          <div class="decision"><i>4</i><div><h3>平台 Agent 供给继续沿用既有能力</h3><p>本次重点是企业内 Agent 的流转和治理，不重做已有的平台审核、平台 Agent 目录与商品逻辑。</p></div></div>
+        </article>
+      </section>
+
+      <section id="scope">
+        <h2>落地范围</h2>
+        <div class="two">
+          <article class="card"><h3>本次交付</h3><ul><li>Agent 的创造、分发、使用与治理主链路。</li><li>企业成员批量导入、跨部门归属和席位校验。</li><li>企业管理操作日志：成员、角色、组织和 Agent 管理动作可追溯。</li></ul></article>
+          <article class="card"><h3>本期不做</h3><ul><li>席位、积分包与订单商品化。</li><li>既有平台审核和平台 Agent 目录改造。</li><li>HR 系统全量同步。</li><li>企业风险策略的具体配置规则。</li></ul></article>
+        </div>
+        <div class="note"><b>待明确：</b>风险评估仍在稳定版本发布时完成；企业采用什么风险规则、谁维护规则，单独确定，不阻塞本次主体验。</div>
+      </section>
+
+      <section id="screens">
+        <h2>关键画面：评审时应看到什么</h2>
+        <p class="intro">以下画面按真实使用顺序排列。只看这一段，也能理解 Agent 从发布到被使用、再到组织展示的关键变化。</p>
+        <div class="shot-wall">
+          <article class="shot wide"><img src="assets/review-shots/release-agent.png" alt="进化实验室发布 Agent 页面"><div class="caption"><b>1. 先发布一个可用版本</b><span>进化实验室只确认 Agent 已经可以运行。发布后，创造者立即能用；分享和企业专区展示不再挤在这一步。</span></div></article>
+          <article class="shot wide"><div class="story-strip"><figure><img src="assets/review-shots/share-select-dialogue.png" alt="在 ME 对话中勾选要分享的问答"><figcaption>在对话中勾选一组完整问答，生成可控的分享链接。</figcaption></figure><figure><img src="assets/review-shots/share-received-card.png" alt="接收方在 ME 收到 Agent 分享卡"><figcaption>同事收到分享卡，可查看介绍并决定是否加入自己的专家团。</figcaption></figure><figure><img src="assets/review-shots/share-landing-page.png" alt="分享链接落地页"><figcaption>通过链接打开时，先看到 Agent 能解决什么问题，再加入使用。</figcaption></figure><figure><img src="assets/review-shots/share-request-card.png" alt="创建者在 ME 收到 Agent 使用申请"><figcaption>没有使用资格时，接收者申请；创建者在 ME 中处理。</figcaption></figure></div><div class="caption"><b>2. 一次分享，让同事收到接入卡</b><span>分享时不必先逐个配置谁能看见。创造者或使用者把有效的 Agent 推荐出去；接收者点击加入时，系统再校验资格。符合条件即加入，不符合则发起申请。</span></div></article>
+          <article class="shot wide"><div class="story-strip"><figure><img src="assets/review-shots/we-agent-actions.png" alt="WE 专家中分享和上架企业专区入口"><figcaption>WE 专家是日常分发入口：分享给具体同事，或申请上架企业专区。</figcaption></figure><figure><img src="assets/review-shots/listing-scope.png" alt="选择企业专区组织范围"><figcaption>选择部门、子公司或全集团，让对应范围的成员能在企业专区找到它。</figcaption></figure></div><div class="caption"><b>3. 让组织能主动发现</b><span>分享解决“我知道该给谁”；企业专区解决“我不知道该找哪个 Agent”。需要扩大范围时，按目标组织的规则直接上架或提交审批。</span></div></article>
+          <article class="shot wide"><div class="story-strip"><figure><img src="assets/review-shots/agent-governance.png" alt="企业 Agent 治理清单"><figcaption>企业治理集中处理企业范围内的 Agent、服务状态和待处理事项。</figcaption></figure><figure><img src="assets/review-shots/member-handover.png" alt="停用成员前完成 Agent 和部门负责人交接"><figcaption>成员停用前，必须交接其承担的 Agent 责任和部门平台职责。</figcaption></figure><figure><img src="assets/review-shots/operation-log.png" alt="企业操作日志"><figcaption>组织、成员、权限和 Agent 的管理动作统一留痕，可按范围追溯。</figcaption></figure><figure><img src="assets/review-shots/member-import-preview.png" alt="成员批量导入预览"><figcaption>批量导入先预览处理结果，再确认新增、更新或新增部门归属。</figcaption></figure></div><div class="caption"><b>4. 企业接住关键治理动作</b><span>企业不审批每次日常分享，只处理组织范围上架、服务停止、成员交接和组织数据维护；所有管理动作可在操作日志中追溯。</span></div></article>
+        </div>
+      </section>
+
+      <section class="demo" id="demo">
+        <h2>体验 Demo</h2>
+        <p>建议按一条真实路径体验：发布稳定版本 → 在 WE 分享或申请上架 → 接收者加入 ME → 企业管理员处理审批、成员交接和日志查询。</p>
+        <a href="Frontis%20AI%20%C2%B7%20Agent%20%E5%88%86%E5%8F%91%E4%B8%8E%E4%BD%BF%E7%94%A8%20Demo%20%C2%B7%20%E7%AC%AC%E4%B8%80%E8%BD%AE.html">打开可交互 Demo</a>
+        <a class="secondary" href="Frontis%20AI%20%C2%B7%20Agent%20%E5%88%86%E5%8F%91%E4%B8%8E%E4%BD%BF%E7%94%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%20PRD.md">查看主 PRD</a>
+      </section>
+      <div class="footer">Frontis AI · 产品内部评审材料</div>
+    </main>
+  </div>
+</body>
+</html>
